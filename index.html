@@ -148,7 +148,7 @@
             }]
         });
 
-        var consumptionChart = new Highcharts.chart('consumptionChartContainer', {        
+        var consumptionChart = new Highcharts.chart('consumptionChartContainer', {
             time: {
                 useUTC: true,
                 timezoneOffset: -180
@@ -190,7 +190,7 @@
         var feedTime = kgPerHour / 3600;
 
         var updateInfo = function () {
-            
+
             $.getJSON("/api/getInfo", function (data) {
                 console.log("begin Info")
                 if (data == null || data.length == 0 || typeof data[0].SwVer === "undefined") {
@@ -229,17 +229,17 @@
 
                 $('#spPower').text(status + (power.length > 0 ? " / " : "") + power);
 
-                console.log("end Info")      
-            });   
+                console.log("end Info")
+            });
 
             var ts;
 
             if (dataPointsPower != null & dataPointsPower.length > 0) {
                 ts = dataPointsPower[dataPointsPower.length - 1][0] / 1000;
             }else {
-                ts = "null"; 
+                ts = "null";
             }
-                       
+
             $.getJSON("/api/getStats",  {timestamp: ts } ).done( function (data) {
                     console.log("begin getStats");
                     // Do not clean, just update with new data
@@ -248,7 +248,7 @@
                     //dataPointsTset.length = 0;
                     //dataPointsTboiler.length = 0;
                     //dataPointsDHW.length = 0;
-                    
+
                     // TODO: think how to shift these
                     if(data.length > dataPointsPower.length) {
                         for (i = 0; i < data.length; i++) {
@@ -258,13 +258,13 @@
                             dataPointsTboiler.shift();
                             dataPointsDHW.shift();
                         }
-                    }                    
+                    }
 
-                    $.each(data, function (key, value) {                          
-                        dataPointsPower.push([ moment(value.Date).valueOf(), value.Power ]);                        
-                        dataPointsFlame.push([ moment(value.Date).valueOf(), value.Flame ]);                        
-                        dataPointsTset.push([ moment(value.Date).valueOf(), value.Tset ]);                        
-                        dataPointsTboiler.push([ moment(value.Date).valueOf(), value.Tboiler ]);                        
+                    $.each(data, function (key, value) {
+                        dataPointsPower.push([ moment(value.Date).valueOf(), value.Power ]);
+                        dataPointsFlame.push([ moment(value.Date).valueOf(), value.Flame ]);
+                        dataPointsTset.push([ moment(value.Date).valueOf(), value.Tset ]);
+                        dataPointsTboiler.push([ moment(value.Date).valueOf(), value.Tboiler ]);
                         dataPointsDHW.push([ moment(value.Date).valueOf(), value.DHW ]);
                     });
 
@@ -290,21 +290,21 @@
                     consumptionChart.series[0].setData(dataPointsFFWorkTime, false);
                     consumptionChart.redraw();
                     });
-                });        
+                });
         };
 
         $.getJSON("/api/getConsumptionByMonth", function(data){
             dataPointsMonthlyUsage.length = 0;
-        
+
             $.each(data, function(key, value) {
                 dataPointsMonthlyUsage.push([Date.parse(value.yr_mon), Math.round (value.FFWork * feedTime )]);
             });
-                
+
             monthlyConsumptionChart.series[0].setData(dataPointsMonthlyUsage, false);
             monthlyConsumptionChart.redraw();
         });
 
-        updateInfo();        
+        updateInfo();
 
         // update chart after specified interval
         setInterval(function () { updateInfo() }, updateInterval);
@@ -390,7 +390,7 @@
                                 </div>
                         </div>
                     </div>
-                </div> 
+                </div>
             </div>
         </div>
     </div>
@@ -398,6 +398,6 @@
     <script src="/content/jquery-3.3.1.min.js"></script>
     <script src="/content/moment.min.js"></script>
     <script src="/content/highcharts.js"></script>
-    <script src="/content/bootstrap.min.js"></script>    
+    <script src="/content/bootstrap.min.js"></script>
 </body>
 </html>

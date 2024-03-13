@@ -50,13 +50,13 @@ class GetStatsHandler(tornado.web.RequestHandler):
         cursor = dbconn.cursor()
         cursor.row_factory=sqlite3.Row
 
-        timestamp = self.get_argument('timestamp', None)        
+        timestamp = self.get_argument('timestamp', None)
         print timestamp
 
         if ( timestamp == "null"):
             cursor.execute("SELECT strftime('%Y-%m-%dT%H:%M:%f', [Date]) AS [Date], [Power], [Flame], [Tset], [Tboiler], [DHW], [ThermostatStop] \
                           FROM [BurnerLogs] WHERE [Date] >= datetime('now', '-24 hours')")
-        else:            
+        else:
             timestamp = datetime.fromtimestamp(float(timestamp))
             cursor.execute("SELECT strftime('%Y-%m-%dT%H:%M:%f', [Date]) AS [Date], [Power], [Flame], [Tset], [Tboiler], [DHW], [ThermostatStop] \
                           FROM [BurnerLogs] WHERE [Date] >=:tstamp", {"tstamp": timestamp})

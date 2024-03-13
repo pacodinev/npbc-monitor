@@ -92,10 +92,10 @@ class SerialProcess(multiprocessing.Process):
                             time.sleep(0.5)
                             if (sp.inWaiting() > 0):
                                 resetFFWorkTimeCounterCommandResponseData = bytearray(sp.read(sp.inWaiting()))
-                                
+
                             if (len(resetFFWorkTimeCounterCommandResponseData) > 0):
                                 resetFFWorkTimeCounterCommandResponse = npbc_communication.resetFFWorkTimeCounterCommand().processResponseData(resetFFWorkTimeCounterCommandResponseData)
-                                
+
                                 if (isinstance(resetFFWorkTimeCounterCommandResponse, npbc_communication.failResponse)):
                                     print "   -> failed"
 

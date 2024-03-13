@@ -44,16 +44,16 @@ class commandBase(object):
 
     def getRequestData(self, data):
         request = bytearray()
-        
+
         # data length = 1 byte command Id + requestData.Length + 1 byte checksum
         request.append(len(data) + 2)
-        
+
         # command Id
         request.append(self.__commandId)
-        
+
         # request data
         request.extend(data)
-        
+
         # checksum
         request.append(self.__calculateCheckSum(request))
 
