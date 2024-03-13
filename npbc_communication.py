@@ -24,7 +24,7 @@ class generalInformationResponse(successResponse):
         self.PelletJam = (data[13] & (1 << 5)) != 0
         self.Tset = data[16]
         self.Tboiler = data[17]
-	self.DHW    = data[18]
+        self.DHW    = data[18]
         self.Flame = data[20]
         self.Heater = (data[21] & (1 << 1)) != 0
         self.CHPump = (data[21] & (1 << 3)) != 0

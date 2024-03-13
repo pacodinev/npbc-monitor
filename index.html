@@ -14,7 +14,7 @@
         var dataPointsTset = [];
         var dataPointsTboiler = [];
         var dataPointsFFWorkTime = [];
-		var dataPointsDHW = [];
+        var dataPointsDHW = [];
         var dataPointsMonthlyUsage = [];
 
 //        Highcharts.setOptions({
@@ -102,12 +102,12 @@
                 name: 'DHW',
                 type: 'line',
                 color: 'black',
-		shadow: {
-			color: 'gray',
-			width: 5,
-			offsetX: 0,
-			offsetY: 0,
-		},
+                shadow: {
+                    color: 'gray',
+                    width: 5,
+                    offsetX: 0,
+                    offsetY: 0,
+                },
                 data: dataPointsDHW
             }]
         });
@@ -148,11 +148,11 @@
             }]
         });
 
-        var consumptionChart = new Highcharts.chart('consumptionChartContainer', {		
-    	    time: {
-		useUTC: true,
-		timezoneOffset: -180
-	    },
+        var consumptionChart = new Highcharts.chart('consumptionChartContainer', {        
+            time: {
+                useUTC: true,
+                timezoneOffset: -180
+            },
             title: {
                 text: null
             },
@@ -200,8 +200,8 @@
                 }
 
                 $('#spFlame').text(data[0].Flame);
-		        $('#spTBoiler').text(data[0].Tboiler);
-		        $('#spTDHW').text(data[0].DHW);
+                $('#spTBoiler').text(data[0].Tboiler);
+                $('#spTDHW').text(data[0].DHW);
 
                 var power = '';
                 switch (data[0].Power) {
@@ -331,15 +331,15 @@
                                     <div class="col">
                                         <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">Flame: <span id="spFlame" style="padding-left:10px"> </span></button>
                                     </div>
-				    <div class="col">
+                                    <div class="col">
                                         <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">TBoiler:  <span id="spTBoiler" style="padding-left:10px"></span></button>
                                     </div>
                                     <div class="col">
                                         <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">Power: <span id="spPower" style="padding-left:10px"> </span></button>
                                     </div>
-			    	    <div class="col">
-					<button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">TDHW: <span id="spTDHW" style="padding-left:10"></span></button>
-				    </div>
+                                    <div class="col">
+                                        <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">TDHW: <span id="spTDHW" style="padding-left:10"></span></button>
+                                    </div>
                                     <div class="col">
                                         <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">Consumption: <span id="spConsumption" style="padding-left:10px">0.00 kg / 24h</span></button>
                                     </div>

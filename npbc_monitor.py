@@ -146,7 +146,7 @@ def initializeDatabase():
                            [Tboiler] INTEGER NOT NULL, \
                            [Flame] INTEGER NOT NULL, \
                            [Heater] TINYINT NOT NULL, \
-			   [DHW] TINYINT NOT NULL, \
+                           [DHW] TINYINT NOT NULL, \
                            [CHPump] TINYINT NOT NULL, \
                            [BF] TINYINT NOT NULL, \
                            [FF] TINYINT NOT NULL, \
@@ -170,7 +170,7 @@ if __name__ == '__main__':
             (r"/api/getStats", GetStatsHandler),
             (r"/api/getConsumptionStats", GetConsumptionStatsHandler),
             (r"/api/getConsumptionByMonth", GetConsumptionByMonthHandler),
-	    (r"/content/(.*)", web.StaticFileHandler, {'path': currDir + '/content'}),
+            (r"/content/(.*)", web.StaticFileHandler, {'path': currDir + '/content'}),
         ]
     )
     httpServer = tornado.httpserver.HTTPServer(app)
