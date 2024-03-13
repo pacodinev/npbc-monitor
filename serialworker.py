@@ -119,7 +119,7 @@ class SerialProcess(multiprocessing.Process):
                                                    [Heater], [CHPump], [DHW], [BF], [FF], [Fan], [Power], [ThermostatStop], [FFWorkTime]) VALUES (datetime(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?)", params)
                             dbconn.commit()
 
-            except Exception, e1:
+            except Exception as e1:
                 print "error communicating...: " + str(e1)
 
             time.sleep(15)
