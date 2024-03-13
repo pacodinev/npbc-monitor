@@ -66,6 +66,7 @@ class SerialProcess(multiprocessing.Process):
                 sp.write(requestData)
 
                 time.sleep(0.5)
+                responseData = bytearray()
                 if (sp.inWaiting() > 0):
                     responseData = bytearray(sp.read(sp.inWaiting()))
 
@@ -90,6 +91,7 @@ class SerialProcess(multiprocessing.Process):
                             sp.write(resetFFWorkTimeCounterCommandRequestData)
 
                             time.sleep(0.5)
+                            resetFFWorkTimeCounterCommandResponseData = bytearray()
                             if (sp.inWaiting() > 0):
                                 resetFFWorkTimeCounterCommandResponseData = bytearray(sp.read(sp.inWaiting()))
 
