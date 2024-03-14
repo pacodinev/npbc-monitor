@@ -17,6 +17,11 @@ import tornado.gen
 from tornado.options import define, options
 import tornado.web as web
 import npbc_communication
+import setBoilerTemperature
+import SetModeAndPriority
+from  tornado.escape import json_decode
+from  tornado.escape import json_encode
+
 
 define("port", default=settings.WEB_UI_PORT, help="run on the given port", type=int)
 
@@ -89,6 +94,23 @@ class GetConsumptionByMonthHandler(tornado.web.RequestHandler):
         self.set_header("Content-Type", "application/json")
         cursor.connection.close()
 
+class SetBoilerTemperatureHandler(tornado.web.RequestHandler):
+    def post(self):
+        json_obj = json_decode(self.request.body)
+        boilerTemperature = json_obj["boilerTemperature"]
+        sp = setBoilerTemperature.SerialProcessSet(int(boilerTemperature))
+        sp.start()
+
+        self.write(json.dumps(boilerTemperature))
+
+class SetModeAndPriorityHandler(tornado.web.RequestHandler):
+    def post(self):
+        json_obj = json_decode(self.request.body)
+        mode = json_obj["Mode"]
+        priority = json_obj["Priority"]
+        sp = SetModeAndPriority.SerialProcessSet(int(mode),int(priority))
+        sp.start()
+        self.write(json.dumps(json_obj))
 
 # Work by hours
 # SELECT sum(FFWorkTime), strftime ('%H',Date) hour
@@ -141,6 +163,8 @@ if __name__ == '__main__':
             (r"/api/getStats", GetStatsHandler),
             (r"/api/getConsumptionStats", GetConsumptionStatsHandler),
             (r"/api/getConsumptionByMonth", GetConsumptionByMonthHandler),
+            (r"/api/setBoilerTemperature", SetBoilerTemperatureHandler),
+            (r"/api/setModeAndPriority", SetModeAndPriorityHandler),
             (r"/content/(.*)", web.StaticFileHandler, {'path': currDir + '/content'}),
         ]
     )
