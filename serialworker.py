@@ -35,9 +35,10 @@ class SerialProcess(multiprocessing.Process):
         while (True):
             time.sleep(15)
 
-            try:
-                print ("exec: generalInformationCommand()")
+            print ("exec: generalInformationCommand()")
 
+            sp = None
+            try:
                 sp = serial.Serial(settings.SERIAL_PORT, settings.SERIAL_BAUDRATE, timeout=1, exclusive=True)
                 if(sp.is_open):
                     sp.reset_output_buffer()
@@ -87,7 +88,8 @@ class SerialProcess(multiprocessing.Process):
                             else:
                                 self.__writeToDB(dbconn, response);
 
-                except Exception as e1:
-                    print ("error communicating...: " + str(e1))
-                finally:
+            except Exception as e1:
+                print ("error communicating...: " + str(e1))
+            finally:
+                if sp is not None:
                     sp.close()

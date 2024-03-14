@@ -15,10 +15,11 @@ class SerialProcessSet(multiprocessing.Process):
         self.__boilerTemperature=boilerTemperature
 
     def __runCommand(self):
-        sp = serial.Serial(settings.SERIAL_PORT, settings.SERIAL_BAUDRATE, timeout=1, exclusive=True)
-        print ("communicating on port: " + sp.name)
-        if (sp.is_open):
-            try:
+        sp = None
+        try:
+            sp = serial.Serial(settings.SERIAL_PORT, settings.SERIAL_BAUDRATE, timeout=1, exclusive=True)
+            print ("communicating on port: " + sp.name)
+            if (sp.is_open):
                 sp.reset_output_buffer()
                 time.sleep(0.1)
                 sp.reset_input_buffer()
@@ -46,9 +47,10 @@ class SerialProcessSet(multiprocessing.Process):
                 else:
                     print( "   -> failed in response data")
 
-            except Exception as e1:
-                print ("error communicating...: " + str(e1))
-            finally:
+        except Exception as e1:
+            print ("error communicating...: " + str(e1))
+        finally:
+            if sp is not None:
                 sp.close()
         return False
 
@@ -57,3 +59,4 @@ class SerialProcessSet(multiprocessing.Process):
             success = self.__runCommand();
             if success == True:
                 break
+            time.sleep(2)
