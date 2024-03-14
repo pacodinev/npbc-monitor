@@ -30,7 +30,7 @@ class GetInfoHandler(tornado.web.RequestHandler):
         dbconn = sqlite3.connect(settings.DATABASE)
         cursor = dbconn.cursor()
         cursor.row_factory=sqlite3.Row
-        cursor.execute("SELECT [SwVer], [Power], [Flame], [Tset], [Tboiler], [State], [Status], [DHW] \
+        cursor.execute("SELECT [SwVer], [Power], [Flame], [Tset], [Tboiler], [State], [Status], [DHW], [Mode],[CHPump],[BF],[FF], [DHWPump], [Fan] \
                           FROM [BurnerLogs] WHERE [Date] >= datetime('now', '-1 minutes') ORDER BY [Date] DESC LIMIT 1")
 
         result = []
@@ -146,6 +146,7 @@ def initializeDatabase():
                            [Tboiler] INTEGER NOT NULL, \
                            [Flame] INTEGER NOT NULL, \
                            [Heater] TINYINT NOT NULL, \
+                           [DhwPump] TINYINT NOT NULL, \
                            [DHW] TINYINT NOT NULL, \
                            [CHPump] TINYINT NOT NULL, \
                            [BF] TINYINT NOT NULL, \
