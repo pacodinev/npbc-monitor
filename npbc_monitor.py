@@ -131,37 +131,7 @@ class GetConsumptionStatsHandler(tornado.web.RequestHandler):
         cursor.connection.close()
 
 
-def initializeDatabase():
-    dbconn = sqlite3.connect(settings.DATABASE)
-    dbconn.execute("CREATE TABLE IF NOT EXISTS [BurnerLogs] ( \
-                           [Timestamp] DATETIME NOT NULL PRIMARY KEY, \
-                           [SwVer] NVARCHAR NOT NULL, \
-                           [Date] DATETIME NOT NULL, \
-                           [Mode] INTEGER NOT NULL, \
-                           [State] INTEGER NOT NULL, \
-                           [Status] INTEGER NOT NULL, \
-                           [IgnitionFail] TINYINT NOT NULL, \
-                           [PelletJam] TINYINT NOT NULL, \
-                           [Tset] INTEGER NOT NULL, \
-                           [Tboiler] INTEGER NOT NULL, \
-                           [Flame] INTEGER NOT NULL, \
-                           [Heater] TINYINT NOT NULL, \
-                           [DhwPump] TINYINT NOT NULL, \
-                           [DHW] TINYINT NOT NULL, \
-                           [CHPump] TINYINT NOT NULL, \
-                           [BF] TINYINT NOT NULL, \
-                           [FF] TINYINT NOT NULL, \
-                           [Fan] INTEGER NOT NULL, \
-                           [Power] INTEGER NOT NULL, \
-                           [ThermostatStop] TINYINT NOT NULL, \
-                           [FFWorkTime] INTEGER NOT NULL)")
-    dbconn.commit()
-
-
 if __name__ == '__main__':
-    ## Initialize database
-    initializeDatabase()
-
     tornado.options.parse_command_line()
     currDir = os.path.dirname( os.path.abspath(__file__))
     app = tornado.web.Application(
