@@ -54,11 +54,11 @@ class GetStatsHandler(tornado.web.RequestHandler):
         print (timestamp)
 
         if ( timestamp == "null"):
-            cursor.execute("SELECT strftime('%Y-%m-%dT%H:%M:%f', [Date]) AS [Date], [Power], [Flame], [Tset], [Tboiler], [DHW], [ThermostatStop] \
+            cursor.execute("SELECT strftime('%Y-%m-%dT%H:%M:%f', [Date]) AS [Date], [Power], [Flame], [Tset], [Tboiler], [DHW] \
                           FROM [BurnerLogs] WHERE [Date] >= datetime('now', '-24 hours')")
         else:
             timestamp = datetime.fromtimestamp(float(timestamp))
-            cursor.execute("SELECT strftime('%Y-%m-%dT%H:%M:%f', [Date]) AS [Date], [Power], [Flame], [Tset], [Tboiler], [DHW], [ThermostatStop] \
+            cursor.execute("SELECT strftime('%Y-%m-%dT%H:%M:%f', [Date]) AS [Date], [Power], [Flame], [Tset], [Tboiler], [DHW] \
                           FROM [BurnerLogs] WHERE [Date] >=:tstamp", {"tstamp": timestamp})
 
         result = []
