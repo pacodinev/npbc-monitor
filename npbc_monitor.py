@@ -115,9 +115,7 @@ class GetConsumptionByMonthHandler(tornado.web.RequestHandler):
         dbconn = sqlite3.connect(settings.DATABASE)
         cursor = dbconn.cursor()
         cursor.row_factory = sqlite3.Row
-        cursor.execute("SELECT strftime('%Y-%m', [Date]) AS yr_mon, sum([FFWorkTime]) as FFWork \
-                        FROM BurnerLogs \
-                        GROUP BY yr_mon;")
+        cursor.execute("SELECT [MonthYear] AS yr_mon, [FFWorkTime] as FFWork FROM [MonthConsumption];")
         result = []
         rows = cursor.fetchall()
         for row in rows:
