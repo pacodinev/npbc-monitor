@@ -13,83 +13,81 @@ class SerialProcess(multiprocessing.Process):
     def __init__(self):
         multiprocessing.Process.__init__(self)
 
+    def __writeToDB(self, dbconn, response):
+        params = [response.SwVer, response.Date, response.Mode, response.State, response.Status, response.IgnitionFail, 
+                  response.PelletJam, response.Tset, response.Tboiler, response.Flame, response.Heater, response.CHPump,
+                  response.DHW, response.BF, response.FF, response.Fan, response.Power, response.ThermostatStop, 
+                  response.FFWorkTime, response.DhwPump]
+
+        dbconn.execute("INSERT INTO [BurnerLogs] ([Timestamp], [SwVer], [Date], [Mode], [State], [Status], [IgnitionFail], [PelletJam], [Tset], [Tboiler], [Flame], \
+                               [Heater],[CHPump],[DHW],  [BF], [FF], [Fan], [Power], [ThermostatStop], [FFWorkTime], [DhwPump]) \
+                               VALUES (datetime(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
+        dbconn.commit()
+
     def run(self):
-        sp = serial.Serial(settings.SERIAL_PORT, settings.SERIAL_BAUDRATE, timeout=1)
-        print ("communicating on port: " + sp.portstr)
+        print ("communicating on port: " + settings.SERIAL_PORT)
 
         dbconn = sqlite3.connect(settings.DATABASE)
+        requestData = npbc_communication.generalInformationCommand().getRequestData()
+        resetFFWorkTimeCounterCommandRequestData = npbc_communication.resetFFWorkTimeCounterCommand().getRequestData()
 
-
-        while (sp.isOpen()):
-
-            #resetFFWorkTimeCounterCommandResponseData = bytearray(self.testresetFFWorkTimeCounterCommandResponse)
+        # while (sp.isOpen()):
+        while (True):
+            time.sleep(15)
 
             try:
                 print ("exec: generalInformationCommand()")
 
-                time.sleep(0.1)
-                sp.flushInput()
-                sp.flushOutput()
+                sp = serial.Serial(settings.SERIAL_PORT, settings.SERIAL_BAUDRATE, timeout=1, exclusive=True)
+                if(sp.is_open):
+                    sp.reset_output_buffer()
+                    time.sleep(0.1)
+                    sp.reset_input_buffer()
 
-                time.sleep(0.1)
-                requestData = npbc_communication.generalInformationCommand().getRequestData()
-                sp.write(requestData)
+                    sp.write(requestData)
+                    time.sleep(0.5)
 
-                time.sleep(0.5)
-                responseData = bytearray()
-                if (sp.in_waiting() > 0):
-                    responseData = bytearray(sp.read(sp.in_waiting()))
+                    responseData = bytearray()
+                    if (sp.in_waiting > 0):
+                        responseData = bytearray(sp.read(sp.in_waiting))
 
-                if (len(responseData) > 0):
-                    response = npbc_communication.generalInformationCommand().processResponseData(responseData)
+                    if (len(responseData) > 0):
+                        response = npbc_communication.generalInformationCommand().processResponseData(responseData)
 
-                    if (isinstance(response, npbc_communication.failResponse)):
-                        print( "   -> failed")
+                        if (isinstance(response, npbc_communication.failResponse)):
+                            print( "   -> failed")
 
-                    if (isinstance(response, npbc_communication.generalInformationResponse)):
-                        print( "   -> success")
+                        if (isinstance(response, npbc_communication.generalInformationResponse)):
+                            print( "   -> success")
 
-                        if (response.FFWorkTime > 0):
-                            print ("exec: resetFFWorkTimeCounterCommand()")
+                            if (response.FFWorkTime > 0):
+                                print ("exec: resetFFWorkTimeCounterCommand()")
 
-                            time.sleep(0.1)
-                            sp.flushInput()
-                            sp.flushOutput()
+                                sp.reset_output_buffer()
+                                time.sleep(0.1)
+                                sp.reset_input_buffer()
 
-                            time.sleep(0.1)
-                            resetFFWorkTimeCounterCommandRequestData = npbc_communication.resetFFWorkTimeCounterCommand().getRequestData()
-                            sp.write(resetFFWorkTimeCounterCommandRequestData)
+                                sp.write(resetFFWorkTimeCounterCommandRequestData)
 
-                            time.sleep(0.5)
-                            resetFFWorkTimeCounterCommandResponseData = bytearray()
-                            if (sp.in_waiting > 0):
-                                resetFFWorkTimeCounterCommandResponseData = bytearray(sp.read(sp.in_waiting()))
+                                time.sleep(0.5)
+                                resetFFWorkTimeCounterCommandResponseData = bytearray()
+                                if (sp.in_waiting > 0):
+                                    resetFFWorkTimeCounterCommandResponseData = bytearray(sp.read(sp.in_waiting))
 
-                            if (len(resetFFWorkTimeCounterCommandResponseData) > 0):
-                                resetFFWorkTimeCounterCommandResponse = npbc_communication.resetFFWorkTimeCounterCommand().processResponseData(resetFFWorkTimeCounterCommandResponseData)
+                                if (len(resetFFWorkTimeCounterCommandResponseData) > 0):
+                                    resetFFWorkTimeCounterCommandResponse = npbc_communication.resetFFWorkTimeCounterCommand().processResponseData(resetFFWorkTimeCounterCommandResponseData)
 
-                                if (isinstance(resetFFWorkTimeCounterCommandResponse, npbc_communication.failResponse)):
-                                    print ("   -> failed")
+                                    if (isinstance(resetFFWorkTimeCounterCommandResponse, npbc_communication.failResponse)):
+                                        print ("   -> failed")
 
-                                if (isinstance(resetFFWorkTimeCounterCommandResponse, npbc_communication.successResponse)):
-                                    print ("   -> success")
+                                    if (isinstance(resetFFWorkTimeCounterCommandResponse, npbc_communication.successResponse)):
+                                        print ("   -> success")
 
-                                    params = [response.SwVer, response.Date, response.Mode, response.State, response.Status, response.IgnitionFail, response.PelletJam, response.Tset, response.Tboiler, response.Flame,
-                                              response.Heater, response.CHPump,response.DHW, response.BF, response.FF, response.Fan, response.Power, response.ThermostatStop, response.FFWorkTime, response.DhwPump]
+                                        self.__writeToDB(dbconn, response);
+                            else:
+                                self.__writeToDB(dbconn, response);
 
-                                    dbconn.execute("INSERT INTO [BurnerLogs] ([Timestamp], [SwVer], [Date], [Mode], [State], [Status], [IgnitionFail], [PelletJam], [Tset], [Tboiler], [Flame], \
-                                                           [Heater],[CHPump],[DHW],  [BF], [FF], [Fan], [Power], [ThermostatStop], [FFWorkTime], [DhwPump]) VALUES (datetime(), ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
-                                    dbconn.commit()
-
-                        else:
-                            params = [response.SwVer, response.Date, response.Mode, response.State, response.Status, response.IgnitionFail, response.PelletJam, response.Tset, response.Tboiler, response.Flame,
-                                      response.Heater, response.CHPump, response.DHW, response.BF, response.FF, response.Fan, response.Power, response.ThermostatStop, response.FFWorkTime, response.DhwPump]
-
-                            dbconn.execute("INSERT INTO [BurnerLogs] ([Timestamp], [SwVer], [Date], [Mode], [State], [Status], [IgnitionFail], [PelletJam], [Tset], [Tboiler], [Flame], \
-                                                   [Heater], [CHPump], [DHW], [BF], [FF], [Fan], [Power], [ThermostatStop], [FFWorkTime], [DhwPump]) VALUES (datetime(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", params)
-                            dbconn.commit()
-
-            except Exception as e1:
-                print ("error communicating...: " + str(e1))
-
-            time.sleep(15)
+                except Exception as e1:
+                    print ("error communicating...: " + str(e1))
+                finally:
+                    sp.close()
