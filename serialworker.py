@@ -31,9 +31,8 @@ class SerialProcess(multiprocessing.Process):
         requestData = npbc_communication.generalInformationCommand().getRequestData()
         resetFFWorkTimeCounterCommandRequestData = npbc_communication.resetFFWorkTimeCounterCommand().getRequestData()
 
-        # while (sp.isOpen()):
         while (True):
-            time.sleep(15)
+            time.sleep(settings.DATA_LOG_PERIOD)
 
             print ("exec: generalInformationCommand()")
 
