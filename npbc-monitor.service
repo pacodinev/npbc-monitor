@@ -1,0 +1,16 @@
+[Unit]
+Description=NPBC Monitor
+After=network.target
+StartLimitIntervalSec=0
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=npbc-monitor
+Group=npbc-monitor
+WorkingDirectory=/opt/npbc-monitor
+ExecStart=/opt/npbc-monitor/venv/bin/python3 /opt/npbc-monitor/npbc_monitor.py
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target
