@@ -308,6 +308,52 @@
 
         // update chart after specified interval
         setInterval(function () { updateInfo() }, updateInterval);
+
+        $("#submitTemp").click(function(event) {
+            // console.log( $('#boilerTemperature').val());
+            var data = {
+                boilerTemperature: $('#boilerTemperature').val()
+            };
+
+            var dataToSend = JSON.stringify(data);
+            $.ajax({
+                url: '/api/setBoilerTemperature',
+                type: 'POST',
+                data: dataToSend,
+
+                success: function (jsonResponse) {
+                    var objresponse = JSON.parse(jsonResponse);
+                    console.log(objresponse['boilerTemperature']);
+
+                    $("#boilerTemperature").text(objresponse['boilerTemperature']);
+                },
+                error: function () {
+                    $("#boilerTemperature").text("Error to load api");
+                }
+            });
+        });
+
+        $("#submitMode").click(function(event) {
+            // console.log( $('#Mode').val());
+            // console.log( $('#Priority').val());
+            var data = {
+                Mode: $('#Mode').val(),
+                Priority: $('#Priority').val()
+            };
+
+            var dataToSend = JSON.stringify(data);
+            $.ajax({
+                url: '/api/setModeAndPriority',
+                type: 'POST',
+                data: dataToSend,
+
+                success: function (jsonResponse) {
+                    var objresponse = JSON.parse(jsonResponse);
+
+                },
+                // error: function () {} // TODO
+            });
+        });
     }
     </script>
 </head>
@@ -379,12 +425,23 @@
                                 <div class="panel-body">
                                     <div class="row">
                                         <div class="col">
-                                            <label>Start / Stop Burner </label>
-                                            <input type="button" />
+                                            <label>Mode </label>
+                                            <select name="Mode" id="Mode">
+                                                <option value="0">StandBy</option>
+                                                <option value="1">Auto</option>
+                                                <option value="2">Timer</option>
+                                            </select>
+                                            <select name="Priority" id="Priority">
+                                                <option value="0">CHPriority</option>
+                                                <option value="1">DHWPriority</option>
+                                                <option value="2">Paralel Pumps</option>
+                                                <option value="3">Summer Mode</option>
+                                            </select>
+                                            <button id="submitMode">Set</button>
                                             <br>
                                             <label>Temperature: </Label>
-                                            <input />
-                                            <button id="submitTemp" />
+                                            <input type="number" id="boilerTemperature" />
+                                            <button id="submitTemp">Set</button>
                                         </div>
                                     </div>
                                 </div>
