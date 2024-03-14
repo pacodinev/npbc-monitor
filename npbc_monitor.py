@@ -51,7 +51,7 @@ class GetStatsHandler(tornado.web.RequestHandler):
         cursor.row_factory=sqlite3.Row
 
         timestamp = self.get_argument('timestamp', None)
-        print timestamp
+        print (timestamp)
 
         if ( timestamp == "null"):
             cursor.execute("SELECT strftime('%Y-%m-%dT%H:%M:%f', [Date]) AS [Date], [Power], [Flame], [Tset], [Tboiler], [DHW], [ThermostatStop] \
@@ -175,7 +175,7 @@ if __name__ == '__main__':
     )
     httpServer = tornado.httpserver.HTTPServer(app)
     httpServer.listen(options.port)
-    print "Listening on port:", options.port
+    print ("Listening on port:", options.port)
 
     mainLoop = tornado.ioloop.IOLoop.instance()
     mainLoop.start()

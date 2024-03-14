@@ -39,7 +39,7 @@ class SerialProcess(multiprocessing.Process):
 
     def run(self):
         sp = serial.Serial(settings.SERIAL_PORT, settings.SERIAL_BAUDRATE, timeout=1)
-        print "communicating on port: " + sp.portstr
+        print ("communicating on port: " + sp.portstr)
 
         dbconn = sqlite3.connect(settings.DATABASE)
 
@@ -55,7 +55,7 @@ class SerialProcess(multiprocessing.Process):
             #resetFFWorkTimeCounterCommandResponseData = bytearray(self.testresetFFWorkTimeCounterCommandResponse)
 
             try:
-                print "exec: generalInformationCommand()"
+                print ("exec: generalInformationCommand()")
 
                 time.sleep(0.1)
                 sp.flushInput()
@@ -74,13 +74,13 @@ class SerialProcess(multiprocessing.Process):
                     response = npbc_communication.generalInformationCommand().processResponseData(responseData)
 
                     if (isinstance(response, npbc_communication.failResponse)):
-                        print "   -> failed"
+                        print( "   -> failed")
 
                     if (isinstance(response, npbc_communication.generalInformationResponse)):
-                        print "   -> success"
+                        print( "   -> success")
 
                         if (response.FFWorkTime > 0):
-                            print "exec: resetFFWorkTimeCounterCommand()"
+                            print ("exec: resetFFWorkTimeCounterCommand()")
 
                             time.sleep(0.1)
                             sp.flushInput()
@@ -99,10 +99,10 @@ class SerialProcess(multiprocessing.Process):
                                 resetFFWorkTimeCounterCommandResponse = npbc_communication.resetFFWorkTimeCounterCommand().processResponseData(resetFFWorkTimeCounterCommandResponseData)
 
                                 if (isinstance(resetFFWorkTimeCounterCommandResponse, npbc_communication.failResponse)):
-                                    print "   -> failed"
+                                    print ("   -> failed")
 
                                 if (isinstance(resetFFWorkTimeCounterCommandResponse, npbc_communication.successResponse)):
-                                    print "   -> success"
+                                    print ("   -> success")
 
                                     params = [response.SwVer, response.Date, response.Mode, response.State, response.Status, response.IgnitionFail, response.PelletJam, response.Tset, response.Tboiler, response.Flame,
                                               response.Heater, response.CHPump,response.DHW, response.BF, response.FF, response.Fan, response.Power, response.ThermostatStop, response.FFWorkTime]
@@ -120,6 +120,6 @@ class SerialProcess(multiprocessing.Process):
                             dbconn.commit()
 
             except Exception as e1:
-                print "error communicating...: " + str(e1)
+                print ("error communicating...: " + str(e1))
 
             time.sleep(15)

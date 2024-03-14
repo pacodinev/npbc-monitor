@@ -72,18 +72,18 @@ class commandBase(object):
         response = bytearray()
 
         if (len(data) < len(self.__header) + 2):
-            print "Invalid response"
+            print ("Invalid response")
             return bytearray()
 
         # check header
         for i in range(len(self.__header)):
             if (data[i] != self.__header[i]):
-                print "Invalid response header"
+                print ("Invalid response header")
                 return bytearray()
 
         # check length
         if (len(data) != len(self.__header) + 1 + data[len(self.__header)]):
-            print "Invalid response length"
+            print ("Invalid response length")
             return bytearray()
 
         for i in range(2, len(data) - 1, 1):
@@ -95,7 +95,7 @@ class commandBase(object):
 
         # checksum validation
         if (data[len(data) - 1] != ((self.__calculateCheckSum(response) + len(response) - 1) & 0xFF)):
-            print "Response checksum validation failed"
+            print ("Response checksum validation failed")
             return bytearray()
 
         del response[0:1]
