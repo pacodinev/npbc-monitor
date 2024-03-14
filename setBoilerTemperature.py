@@ -24,8 +24,6 @@ class SerialProcessSet(multiprocessing.Process):
                 sp.flushOutput()
                 time.sleep(0.1)
                 requestData = npbc_communication.setBoilerTemperatureCommand(self.__boilerTemperature).getRequestData()
-                #requestData = [0x5A, 0x5A, 0x03, 0x07, 0x47, 0xB1]
-                print(requestData)
                 sp.write(requestData)
                 responseData=""
 
