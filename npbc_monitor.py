@@ -201,7 +201,7 @@ if __name__ == '__main__':
             (r"/api/getConsumptionByMonth", GetConsumptionByMonthHandler),
             (r"/api/setBoilerTemperature", SetBoilerTemperatureHandler),
             (r"/api/setModeAndPriority", SetModeAndPriorityHandler),
-            (r"/content/(.*)", web.StaticFileHandler, {'path': currDir + '/content'}),
+            # (r"/content/(.*)", web.StaticFileHandler, {'path': currDir + '/content'}),
         ] #, cookie_secret="StrongPassKey"
     )
     httpServer = tornado.httpserver.HTTPServer(app)
