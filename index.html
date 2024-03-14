@@ -9,6 +9,9 @@
     window.onload = function () {
 
         // dataPoints
+        var dataPointsSkipEvery = 0;
+        var dataPointsLeftToSkip = 0;
+        var dataPointsLastTS = null;
         var dataPointsPower = [];
         var dataPointsFlame = [];
         var dataPointsTset = [];
@@ -28,7 +31,7 @@
                 text: null
             },
             time: {
-            useUTC: false
+                useUTC: false
             },
             xAxis: {
                 type: 'datetime'
@@ -115,7 +118,7 @@
         var monthlyConsumptionChart = new Highcharts.chart('monthlyConsumptionChartContainer', {
             time : {
                 useUTC: true,
-                timezoneOffset: -180
+                timezoneOffset: -240
             },
             title: {
                 text: null,
@@ -151,7 +154,7 @@
         var consumptionChart = new Highcharts.chart('consumptionChartContainer', {
             time: {
                 useUTC: true,
-                timezoneOffset: -180
+                timezoneOffset: -240
             },
             title: {
                 text: null
@@ -184,130 +187,228 @@
             }]
         });
 
-        var updateInterval = 15000;
+        var updateInterval = 20000;
+        var statsPoints = 200;
 
         var kgPerHour = 30;
         var feedTime = kgPerHour / 3600;
 
-        var updateInfo = function () {
-
-            $.getJSON("/api/getInfo", function (data) {
-                console.log("begin Info")
-                if (data == null || data.length == 0 || typeof data[0].SwVer === "undefined") {
-                    $('#spFlame').text('');
-                    $('#spPower').text('');
-                    return;
-                }
-
-                $('#spFlame').text(data[0].Flame);
-                $('#spTBoiler').text(data[0].Tboiler);
-                $('#spTDHW').text(data[0].DHW);
-
-                var power = '';
-                switch (data[0].Power) {
-                    case 0: power = ''; break;
-                    case 1: power = 'Suspend'; break;
-                    case 2: power = 'Power 1'; break;
-                    case 3: power = 'Power 2'; break;
-                    case 4: power = 'Power 3'; break;
-                };
-
-                var status = '';
-                switch (data[0].Status) {
-                    case 0: status = 'Idle'; break;
-                    case 1: status = 'Fan Cleaning'; break;
-                    case 2: status = 'Cleaner'; break;
-                    case 3: status = 'Wait'; break;
-                    case 4: status = 'Loading'; break;
-                    case 5: status = 'Heating'; break;
-                    case 6: status = 'Ignition1'; break;
-                    case 7: status = 'Ignition2'; break;
-                    case 8: status = 'Unfolding'; break;
-                    case 9: status = 'Burning'; break;
-                    case 10: status = 'Extinction'; break;
-                };
-
-                $('#spPower').text(status + (power.length > 0 ? " / " : "") + power);
-
-                console.log("end Info")
-            });
-
-            var ts;
-
-            if (dataPointsPower != null & dataPointsPower.length > 0) {
-                ts = dataPointsPower[dataPointsPower.length - 1][0] / 1000;
-            }else {
-                ts = "null";
+        var drawInfo = function (data) {
+            // console.log("begin Info")
+            if (data == null || data.length == 0 || typeof data[0].SwVer === "undefined") {
+                $('#spFlame').text('');
+                $('#spPower').text('');
+                return;
             }
 
-            $.getJSON("/api/getStats",  {timestamp: ts } ).done( function (data) {
-                    console.log("begin getStats");
-                    // Do not clean, just update with new data
-                    //dataPointsPower.length = 0;
-                    //dataPointsFlame.length = 0;
-                    //dataPointsTset.length = 0;
-                    //dataPointsTboiler.length = 0;
-                    //dataPointsDHW.length = 0;
+            $('#spFlame').text(data[0].Flame);
+            $('#spTBoiler').text(data[0].Tboiler);
+            $('#spTDHW').text(data[0].DHW);
+            $('#spCHpump').text(data[0].CHPump==1?"ON":"OFF");
+            $('#spFan').text(data[0].Fan);
+            $('#spTset').text(data[0].Tset);
 
-                    // TODO: think how to shift these
-                    if(data.length > dataPointsPower.length) {
-                        for (i = 0; i < data.length; i++) {
-                            dataPointsPower.shift();
-                            dataPointsFlame.shift();
-                            dataPointsTset.shift();
-                            dataPointsTboiler.shift();
-                            dataPointsDHW.shift();
-                        }
-                    }
 
-                    $.each(data, function (key, value) {
-                        dataPointsPower.push([ moment(value.Date).valueOf(), value.Power ]);
-                        dataPointsFlame.push([ moment(value.Date).valueOf(), value.Flame ]);
-                        dataPointsTset.push([ moment(value.Date).valueOf(), value.Tset ]);
-                        dataPointsTboiler.push([ moment(value.Date).valueOf(), value.Tboiler ]);
-                        dataPointsDHW.push([ moment(value.Date).valueOf(), value.DHW ]);
-                    });
+            var power = '';
+            switch (data[0].Power) {
+                case 0: power = ''; break;
+                case 1: power = 'Suspend'; break;
+                case 2: power = 'Power 1'; break;
+                case 3: power = 'Power 2'; break;
+                case 4: power = 'Power 3'; break;
+            };
 
-                    chart.series[0].setData(dataPointsTset, false);
-                    chart.series[1].setData(dataPointsTboiler, false);
-                    chart.series[2].setData(dataPointsFlame, false);
-                    chart.series[3].setData(dataPointsPower, false);
-                    chart.series[4].setData(dataPointsDHW, false);
-                    chart.redraw();
+            var status = '';
+            switch (data[0].Status) {
+                case 0: status = 'Idle'; break;
+                case 1: status = 'Fan Cleaning'; break;
+                case 2: status = 'Cleaner'; break;
+                case 3: status = 'Wait'; break;
+                case 4: status = 'Loading'; break;
+                case 5: status = 'Heating'; break;
+                case 6: status = 'Ignition1'; break;
+                case 7: status = 'Ignition2'; break;
+                case 8: status = 'Unfolding'; break;
+                case 9: status = 'Burning'; break;
+                case 10: status = 'Extinction'; break;
+            };
 
-                    $.getJSON("/api/getConsumptionStats", function (data) {
-                    dataPointsFFWorkTime.length = 0;
+            var state = '';
+            switch (data[0].State) {
+                case 0: state = 'CHPriority'; break;
+                case 1: state = 'DHWPriority'; break;
+                case 2: state = 'ParallelPumps'; break;
+                case 3: state = 'SummerMode'; break;
+            };
 
-                    $.each(data, function (key, value) {
-                        dataPointsFFWorkTime.push([ Date.parse(value.Timestamp), (Math.round(value.FFWorkTime * feedTime * 100) / 100) ]);
-                    });
+            var mode = '';
+            switch (data[0].Mode) {
+                case 0: mode = 'StandBy'; break;
+                case 1: mode = 'Auto'; break;
+                case 2: mode = 'Timer'; break;
+            };
 
-                    if (dataPointsFFWorkTime.length > 0) {
-                        $('#spConsumption').text(dataPointsFFWorkTime[dataPointsFFWorkTime.length - 1][1] + ' kg / 24h');
-                        dataPointsFFWorkTime.pop();
-                    }
+            $('#Mode').val(data[0].Mode);
+            $('#Priority').val(data[0].State);
+            $('#spState').text(state);
+            $('#spPower').text(status + (power.length > 0 ? " / " : "") + power);
 
-                    consumptionChart.series[0].setData(dataPointsFFWorkTime, false);
-                    consumptionChart.redraw();
-                    });
-                });
+            $('#spMode').text(mode);
+            $('#boilerTemperature').val(data[0].Tset);
+
+            // console.log("end Info")
         };
 
-        $.getJSON("/api/getConsumptionByMonth", function(data){
-            dataPointsMonthlyUsage.length = 0;
+        var drawStats =  function (data) {
+            //console.log("begin getStats");
+            // Do not clean, just update with new datadataPointsPower
+            //dataPointsPower.length = 0;
+            //dataPointsFlame.length = 0;
+            //dataPointsTset.length = 0;
+            //dataPointsTboiler.length = 0;
+            //dataPointsDHW.length = 0;
 
-            $.each(data, function(key, value) {
-                dataPointsMonthlyUsage.push([Date.parse(value.yr_mon), Math.round (value.FFWork * feedTime )]);
+            // TODO: think how to shift these
+            // if(data.length > dataPointsPower.length) {
+            //     for (i = 0; i < data.length; i++) {
+            //         dataPointsPower.shift();
+            //         dataPointsFlame.shift();
+            //         dataPointsTset.shift();
+            //         dataPointsTboiler.shift();
+            //         dataPointsDHW.shift();
+            //     }
+            // }
+
+            if(data.length == 0) {
+                return;
+            }
+
+            if(dataPointsPower.length == 0) {
+                dataPointsSkipEvery = Math.ceil(data.length / statsPoints);
+                console.log("dataPointsSkipEvery: " + dataPointsSkipEvery);
+                dataPointsLeftToSkip = dataPointsSkipEvery-1;
+
+                for(let i=0; i<data.length; i++) {
+                    dataPointsLeftToSkip--;
+                    if(dataPointsLeftToSkip != 0) continue;
+                    dataPointsLeftToSkip = dataPointsSkipEvery-1;
+                    let value = data[i];
+                    dataPointsPower.push([ moment(value.Date).valueOf(), value.Power - 1 ]);
+                    dataPointsFlame.push([ moment(value.Date).valueOf(), value.Flame ]);
+                    dataPointsTset.push([ moment(value.Date).valueOf(), value.Tset ]);
+                    dataPointsTboiler.push([ moment(value.Date).valueOf(), value.Tboiler ]);
+                    dataPointsDHW.push([ moment(value.Date).valueOf(), value.DHW ]);
+                }
+
+
+            } else {
+                if(dataPointsLeftToSkip != dataPointsSkipEvery-1) {
+                    dataPointsPower.pop();
+                    dataPointsFlame.pop();
+                    dataPointsTset.pop();
+                    dataPointsTboiler.pop();
+                    dataPointsDHW.pop();
+                }
+
+                for(i=0; i<data.length; i++) {
+                    dataPointsLeftToSkip--;
+                    if(dataPointsLeftToSkip != 0) continue;
+                    dataPointsLeftToSkip = dataPointsSkipEvery-1;
+                    let value = data[i];
+                    dataPointsPower.push([ moment(value.Date).valueOf(), value.Power - 1 ]);
+                    dataPointsFlame.push([ moment(value.Date).valueOf(), value.Flame ]);
+                    dataPointsTset.push([ moment(value.Date).valueOf(), value.Tset ]);
+                    dataPointsTboiler.push([ moment(value.Date).valueOf(), value.Tboiler ]);
+                    dataPointsDHW.push([ moment(value.Date).valueOf(), value.DHW ]);
+                }
+
+                if(dataPointsPower.length > statsPoints) {
+                    let sliceStart = dataPointsPower.length - statsPoints;
+                    dataPointsPower = dataPointsPower.slice(sliceStart);
+                    dataPointsFlame = dataPointsFlame.slice(sliceStart);
+                    dataPointsTset = dataPointsTset.slice(sliceStart);
+                    dataPointsTboiler = dataPointsTboiler.slice(sliceStart);
+                    dataPointsDHW = dataPointsDHW.slice(sliceStart);
+                }
+            }
+
+            if(dataPointsLeftToSkip != dataPointsSkipEvery-1) {
+                let value = data[data.length-1];
+                dataPointsPower.push([ moment(value.Date).valueOf(), value.Power - 1 ]);
+                dataPointsFlame.push([ moment(value.Date).valueOf(), value.Flame ]);
+                dataPointsTset.push([ moment(value.Date).valueOf(), value.Tset ]);
+                dataPointsTboiler.push([ moment(value.Date).valueOf(), value.Tboiler ]);
+                dataPointsDHW.push([ moment(value.Date).valueOf(), value.DHW ]);
+            }
+
+            chart.series[0].setData(dataPointsTset, false);
+            chart.series[1].setData(dataPointsTboiler, false);
+            chart.series[2].setData(dataPointsFlame, false);
+            chart.series[3].setData(dataPointsPower, false);
+            chart.series[4].setData(dataPointsDHW, false);
+            chart.redraw();
+
+            let lastDate = data[data.length-1].Date;
+            dataPointsLastTS = moment(lastDate).valueOf()/1000;
+        };
+
+        var updateInfo = function () {
+
+            $.getJSON("/api/getInfo", {}, drawInfo);
+
+            let ts = (dataPointsLastTS !== null) ? dataPointsLastTS : "null";
+
+            let queryAndUpdateStats = function () {
+                $.getJSON("/api/getStats",  {timestamp: ts }, function(data) {
+                    drawStats(data);
+                    setTimeout(updateInfo, updateInterval);
+                });
+            }
+
+            if(ts === "null") {
+                // this means that this request is going to be slow, so delay it ...
+                setTimeout(queryAndUpdateStats, 2000);
+            } else {
+                queryAndUpdateStats();
+            }
+
+        };
+
+        let updateConsupmtion = function() {
+            $.getJSON("/api/getConsumptionStats", function (data) {
+                dataPointsFFWorkTime.length = 0;
+
+                $.each(data, function (key, value) {
+                    dataPointsFFWorkTime.push([ Date.parse(value.Timestamp), (Math.round(value.FFWorkTime * feedTime * 100) / 100) ]);
+                });
+
+                if (dataPointsFFWorkTime.length > 0) {
+                    $('#spConsumption').text(dataPointsFFWorkTime[dataPointsFFWorkTime.length - 1][1] + ' kg / 24h');
+                    dataPointsFFWorkTime.pop();
+                }
+
+                consumptionChart.series[0].setData(dataPointsFFWorkTime, false);
+                consumptionChart.redraw();
+
+                $.getJSON("/api/getConsumptionByMonth", function(data){
+                    dataPointsMonthlyUsage.length = 0;
+
+                    $.each(data, function(key, value) {
+                        dataPointsMonthlyUsage.push([Date.parse(value.yr_mon), Math.round (value.FFWork * feedTime )]);
+                    });
+
+                    monthlyConsumptionChart.series[0].setData(dataPointsMonthlyUsage, false);
+                    monthlyConsumptionChart.redraw();
+
+                    setTimeout(updateConsupmtion, 6*updateInterval);
+                });
             });
+        };
 
-            monthlyConsumptionChart.series[0].setData(dataPointsMonthlyUsage, false);
-            monthlyConsumptionChart.redraw();
-        });
+        updateConsupmtion();
 
         updateInfo();
 
-        // update chart after specified interval
-        setInterval(function () { updateInfo() }, updateInterval);
 
         $("#submitTemp").click(function(event) {
             // console.log( $('#boilerTemperature').val());
@@ -375,11 +476,21 @@
                             <div class="panel-body">
                                 <div class="row">
                                     <div class="col">
+                                        <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">Mode:  <span id="spMode" style="padding-left:10px"></span></button>
+                                    </div>
+                                    <div class="col">
                                         <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">Flame: <span id="spFlame" style="padding-left:10px"> </span></button>
+                                    </div>
+                                    <div class="col">
+                                        <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">Tset: <span id="spTset" style="padding-left:10px"></span></button>
                                     </div>
                                     <div class="col">
                                         <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">TBoiler:  <span id="spTBoiler" style="padding-left:10px"></span></button>
                                     </div>
+                                    <div class="col">
+                                        <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">State:  <span id="spState" style="padding-left:10px"></span></button>
+                                    </div>
+
                                     <div class="col">
                                         <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">Power: <span id="spPower" style="padding-left:10px"> </span></button>
                                     </div>
@@ -389,6 +500,13 @@
                                     <div class="col">
                                         <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">Consumption: <span id="spConsumption" style="padding-left:10px">0.00 kg / 24h</span></button>
                                     </div>
+                                    <div class="col">
+                                        <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">CHpump: <span id="spCHpump" style="padding-left:10px"></span></button>
+                                    </div>
+                                    <div class="col">
+                                        <button type="button" class="btn btn-default btn-md btn-block" style="text-align:left; padding-left:20px">Fan: <span id="spFan" style="padding-left:10px"></span></button>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
