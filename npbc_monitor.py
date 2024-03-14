@@ -25,6 +25,40 @@ from  tornado.escape import json_encode
 
 define("port", default=settings.WEB_UI_PORT, help="run on the given port", type=int)
 
+# TODO: fix this, the security of this is F-ed
+# class BaseHandler(tornado.web.RequestHandler):
+#     def get_current_user(self):
+#         return self.get_secure_cookie("user")
+#
+# class MainHandler(BaseHandler):
+#     def get(self):
+#         # if not self.current_user:
+#         #     self.render('indexGuest.html')
+#         # else:
+#         #     self.render('index.html')
+#         self.render('index.html')
+#
+# class LoginHandler(BaseHandler):
+#     def get(self):
+#         self.write('<html><body><form action="/login" method="post">'
+#                    'Name: <input type="text" name="name">'
+#                    'Password: <input type="password" name="password">'
+#                    '<input type="submit" value="Sign in">'
+#                    '</form></body></html>')
+#
+#     def post(self):
+#         # TODO: salt and hash the password before storing in the DB, then salt
+#         # and hash the user's input password before comparing.
+#         username = self.get_argument("name")
+#         password = self.get_argument("password")
+#         doc = True #Implement login
+#         if doc:
+#             self.set_secure_cookie("user", username)
+#             self.redirect("/")
+#         else:
+#             # No such user or wrong password.
+#             self.redirect("/")
+
 class IndexHandler(tornado.web.RequestHandler):
     def get(self):
         self.render('index.html')
@@ -159,6 +193,8 @@ if __name__ == '__main__':
     app = tornado.web.Application(
         handlers=[
             (r"/", IndexHandler),
+            # (r"/", MainHandler),
+            # (r"/login", LoginHandler),
             (r"/api/getInfo", GetInfoHandler),
             (r"/api/getStats", GetStatsHandler),
             (r"/api/getConsumptionStats", GetConsumptionStatsHandler),
@@ -166,7 +202,7 @@ if __name__ == '__main__':
             (r"/api/setBoilerTemperature", SetBoilerTemperatureHandler),
             (r"/api/setModeAndPriority", SetModeAndPriorityHandler),
             (r"/content/(.*)", web.StaticFileHandler, {'path': currDir + '/content'}),
-        ]
+        ] #, cookie_secret="StrongPassKey"
     )
     httpServer = tornado.httpserver.HTTPServer(app)
     httpServer.listen(options.port)
